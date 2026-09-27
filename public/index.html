@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>Prismfall — tilt the board, chain the light</title>
+<meta name="description" content="A luminous falling-gem puzzle. Match colors, fill rows, then TILT the whole board to unleash cascades.">
+<meta name="theme-color" content="#07051a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Prismfall">
+<meta property="og:title" content="Prismfall">
+<meta property="og:description" content="Match gems, clear rows, and TILT the board to trigger massive cascades.">
+<meta property="og:image" content="https://herval.github.io/prismfall/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="aurora" aria-hidden="true"><i></i><i></i><i></i></div>
+<div id="app">
+  <canvas id="game"></canvas>
+
+  <header id="hud">
+    <div class="stat score"><label>Score</label><span id="score">0</span></div>
+    <div class="stat lvl"><label>Level</label><span id="level">1</span></div>
+    <div class="next"><label>Next</label><canvas id="next"></canvas></div>
+    <button id="pauseBtn" class="icon-btn" aria-label="Pause"><svg viewBox="0 0 24 24"><rect x="6" y="5" width="4" height="14" rx="1.5"/><rect x="14" y="5" width="4" height="14" rx="1.5"/></svg></button>
+  </header>
+
+  <footer id="controls">
+    <button id="tiltL" class="tilt-btn" aria-label="Tilt left"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
+    <div id="meter"><div id="meterFill"></div><span id="meterLabel">TILT</span></div>
+    <button id="tiltR" class="tilt-btn" aria-label="Tilt right"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button>
+  </footer>
+
+  <div id="hint" class="hint">
+    <span><b>Drag</b> move</span><span><b>Tap</b> rotate</span><span><b>Flick ↑</b> shuffle</span><span><b>Flick ↓</b> drop</span>
+  </div>
+
+  <!-- Title -->
+  <section id="menu" class="screen show">
+    <div class="logo">
+      <div class="logo-gems" id="logoGems"></div>
+      <h1>PRISM<span>FALL</span></h1>
+      <p class="tag">tilt the board · chain the light</p>
+    </div>
+    <div class="menu-buttons">
+      <button id="playBtn" class="btn primary">Play</button>
+      <button id="howBtn" class="btn ghost">How to play</button>
+    </div>
+    <div class="best">Best <b id="bestMenu">0</b></div>
+    <div class="toggles">
+      <button class="toggle" data-toggle="music">♪ Music <b>On</b></button>
+      <button class="toggle" data-toggle="sfx">◉ Sound <b>On</b></button>
+    </div>
+  </section>
+
+  <!-- How to -->
+  <section id="howto" class="screen">
+    <h2>How to play</h2>
+    <div class="cards">
+      <div class="card"><div class="demo" data-demo="move"></div><p><b>Drag</b> to slide the falling trio. <b>Tap</b> to rotate it.</p></div>
+      <div class="card"><div class="demo" data-demo="cycle"></div><p><b>Flick up</b> to shuffle its colors. <b>Flick down</b> to slam it.</p></div>
+      <div class="card"><div class="demo" data-demo="match"></div><p>Line up <b>3+ of a color</b>, across, down or diagonal, or <b>fill a whole row</b>.</p></div>
+      <div class="card hot"><div class="demo" data-demo="tilt"></div><p>Clears charge the <b>TILT</b> meter. When it's full, <b>tip the board ◀ ▶</b>: every gem slides over, and each cascade scores <b>double</b>.</p></div>
+      <div class="card"><div class="demo" data-demo="prism"></div><p>Rare <b>Prism gems</b> wipe out every gem of the color they land on.</p></div>
+    </div>
+    <button class="btn primary" data-close="howto">Got it</button>
+  </section>
+
+  <!-- Pause -->
+  <section id="pause" class="screen">
+    <h2>Paused</h2>
+    <div class="menu-buttons">
+      <button id="resumeBtn" class="btn primary">Resume</button>
+      <button id="restartBtn" class="btn ghost">Restart</button>
+      <button id="howBtn2" class="btn ghost">How to play</button>
+      <button id="quitBtn" class="btn ghost">Main menu</button>
+    </div>
+    <div class="toggles">
+      <button class="toggle" data-toggle="music">♪ Music <b>On</b></button>
+      <button class="toggle" data-toggle="sfx">◉ Sound <b>On</b></button>
+    </div>
+  </section>
+
+  <!-- Game over -->
+  <section id="over" class="screen">
+    <p class="over-kicker">The prism shattered</p>
+    <div id="newBest" class="badge">New best!</div>
+    <div class="final" id="finalScore">0</div>
+    <div class="stats">
+      <div><label>Level</label><b id="stLevel">1</b></div>
+      <div><label>Best chain</label><b id="stChain">0</b></div>
+      <div><label>Gems</label><b id="stGems">0</b></div>
+      <div><label>Rows</label><b id="stRows">0</b></div>
+    </div>
+    <div class="best">Best <b id="bestOver">0</b></div>
+    <div class="menu-buttons">
+      <button id="againBtn" class="btn primary">Play again</button>
+      <button id="shareBtn" class="btn ghost">Share score</button>
+      <button id="menuBtn" class="btn ghost">Main menu</button>
+    </div>
+  </section>
+
+  <div id="toast"></div>
+  <div id="rotate-note">Turn your phone upright to play ↻</div>
+</div>
+<script src="game.js"></script>
+</body>
+</html>

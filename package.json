@@ -1,0 +1,6 @@
+{
+  "name": "prismfall",
+  "private": true,
+  "description": "Falling-gem puzzle with a tilting board. Vanilla JS + Canvas 2D + WebAudio.",
+  "scripts": { "dev": "npx --yes serve public -l 3000" }
+}
